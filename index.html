@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Treadmill Intervals</title>
+
+<!-- Add-to-Home-Screen support so this runs full screen like a real app -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Treadmill" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#0b0f14" />
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADiElEQVR4nO3cy27TQBiGYRtlx4INJSkIaCshcWbBtVF6SVwOBwG7FpBIC1fBDiGRD4rjyYzN8ywRNSP55Xdm6ra/eu16B5tcqb0A2iUOInEQiYNo0XV97TXQKJODaGFwkJgcROIgWvSeKwQmB5E4iMRBZCtL5ISUyGOFSBxE4iByCEZkt0LksUIkDiJxEDkEIzI5iMRBZCtLZHIQOSElMjmIxEEkDiJxEC263gdSNjM5iMRBJA4ih2BEJgeRb7wRmRxE4iDymiCRyUEkDiJxENnKEjkhJfJYIRIHkTiIxEHkhJTIVpbIY4VIHEQOwYhMDiJxENmtEJkcRA7BiEwOInEQiYNIHESL3i9vITA5iMRBJA4icRA5ISUyOYh8V5bI5CDymiCRyUEkDiJxENmtEDkEI/JYIRIHkTiIxEHkhJTIVpbIY4VIHEQOwYhMDiJxEImDyFaWyCHYTn3/8vH3P7xx58HuV3IZ/d7t+7XXMH8bm/hda5WIo6xLZvGrdhLxgbSgAWUM/qoSxFHKNve4kT76vWaG2Jx8//xh+4vcuPtw+4tsw+QY3yhljHidwcQxsnHvaN0+xEEkjjGV+I9ecXg4IZ2AWvfI5CDqq++XZuPbp/flLr48eFTu4onJQeQ1wamocJtMDiJxEImDSBxE/fLgce01zMfF2bsSl10dPilx2b8yOYjEQSSOMZWY/7WeKZ04+IN+eVAtzLm6OHs71qVWh0/HutQA/bLe1Jqxi9MR+lgd1Syj81gpZPv7Wr2MThzlbHN3WyijE0dRw+5xI2V0XdfX/cjznzg/fXOZv7Z/9Kz0Sv6JOHZqYyWtNfGTOIj88hYirwkS2a0QLWovYIjzk1vdp9e1VzEZ+6/2hn3hxOI4P7lVewn/kcnEIYvdm8DPyq5PbtZewrQNvsVNb2XXL2UxhqG3uNHHiixa0FwcsmhHQ3HIojVNnJCuX+7XXsK8Df5AWpUsWlZtt7I+lsWuTGi3Ioup2GkcspiWHZ2Qfj1e7eBfYaMtTkgLk8V0FYxDFlNXJA5ZzMOi68f8zPH1xXLEqzGOobd4tMkhi/kZIQ5ZzNVWcchi3vqb957XXgONmsBrgtTi51aImn6HlLpMDiJxEDXxmiBtMjmIxEFkt0JkchA5ISUyOYjEQSQOIodgRLayRB4rROIgEgeRQzAik4NIHES2skQmB5ETUiKTg0gcROIg+gGkyGNXTXq1FAAAAABJRU5ErkJggg==" />
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADiElEQVR4nO3cy27TQBiGYRtlx4INJSkIaCshcWbBtVF6SVwOBwG7FpBIC1fBDiGRD4rjyYzN8ywRNSP55Xdm6ra/eu16B5tcqb0A2iUOInEQiYNo0XV97TXQKJODaGFwkJgcROIgWvSeKwQmB5E4iMRBZCtL5ISUyGOFSBxE4iByCEZkt0LksUIkDiJxEDkEIzI5iMRBZCtLZHIQOSElMjmIxEEkDiJxEC263gdSNjM5iMRBJA4ih2BEJgeRb7wRmRxE4iDymiCRyUEkDiJxENnKEjkhJfJYIRIHkTiIxEHkhJTIVpbIY4VIHEQOwYhMDiJxENmtEJkcRA7BiEwOInEQiYNIHESL3i9vITA5iMRBJA4icRA5ISUyOYh8V5bI5CDymiCRyUEkDiJxENmtEDkEI/JYIRIHkTiIxEHkhJTIVpbIY4VIHEQOwYhMDiJxEImDyFaWyCHYTn3/8vH3P7xx58HuV3IZ/d7t+7XXMH8bm/hda5WIo6xLZvGrdhLxgbSgAWUM/qoSxFHKNve4kT76vWaG2Jx8//xh+4vcuPtw+4tsw+QY3yhljHidwcQxsnHvaN0+xEEkjjGV+I9ecXg4IZ2AWvfI5CDqq++XZuPbp/flLr48eFTu4onJQeQ1wamocJtMDiJxEImDSBxE/fLgce01zMfF2bsSl10dPilx2b8yOYjEQSSOMZWY/7WeKZ04+IN+eVAtzLm6OHs71qVWh0/HutQA/bLe1Jqxi9MR+lgd1Syj81gpZPv7Wr2MThzlbHN3WyijE0dRw+5xI2V0XdfX/cjznzg/fXOZv7Z/9Kz0Sv6JOHZqYyWtNfGTOIj88hYirwkS2a0QLWovYIjzk1vdp9e1VzEZ+6/2hn3hxOI4P7lVewn/kcnEIYvdm8DPyq5PbtZewrQNvsVNb2XXL2UxhqG3uNHHiixa0FwcsmhHQ3HIojVNnJCuX+7XXsK8Df5AWpUsWlZtt7I+lsWuTGi3Ioup2GkcspiWHZ2Qfj1e7eBfYaMtTkgLk8V0FYxDFlNXJA5ZzMOi68f8zPH1xXLEqzGOobd4tMkhi/kZIQ5ZzNVWcchi3vqb957XXgONmsBrgtTi51aImn6HlLpMDiJxEDXxmiBtMjmIxEFkt0JkchA5ISUyOYjEQSQOIodgRLayRB4rROIgEgeRQzAik4NIHES2skQmB5ETUiKTg0gcROIg+gGkyGNXTXq1FAAAAABJRU5ErkJggg==" />
+
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0b0f14;
+    --panel: #121821;
+    --panel-border: #232c38;
+    --text: #eef2f6;
+    --muted: #8a97a6;
+    --accent: #ff7a1a;
+    --accent-soft: #ff9a4a;
+    --good: #2ecc71;
+    --danger: #ff4d4d;
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    height: 100%;
+    overscroll-behavior: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  #app {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-top: calc(var(--safe-top) + 14px);
+    padding-bottom: calc(var(--safe-bottom) + 20px);
+    padding-left: 16px;
+    padding-right: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 4px 0 2px;
+    letter-spacing: -0.2px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  /* ---------- Editor screen ---------- */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .seg-row {
+    display: grid;
+    grid-template-columns: 22px 1fr 1fr 1fr 30px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .seg-row:last-child { border-bottom: none; }
+  .seg-idx {
+    color: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .field { display: flex; flex-direction: column; gap: 2px; }
+  .field label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .field input {
+    background: #0e141c;
+    border: 1px solid var(--panel-border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 7px 6px;
+    font-size: 15px;
+    width: 100%;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 18px;
+    padding: 4px;
+  }
+  .add-row {
+    display: flex;
+    justify-content: center;
+    padding-top: 10px;
+  }
+  .ghost-btn {
+    background: none;
+    border: 1px dashed var(--panel-border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+  .total-line {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 8px 2px 2px;
+  }
+  .primary-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    width: 100%;
+  }
+  .primary-btn:active { opacity: 0.85; }
+  .note {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 10px;
+  }
+
+  /* ---------- Runner screen ---------- */
+  #runner {
+    display: none;
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    padding-top: calc(var(--safe-top) + 16px);
+    padding-bottom: calc(var(--safe-bottom) + 16px);
+    background: var(--bg);
+    transition: background-color 0.25s ease;
+    text-align: center;
+  }
+  #runner.active { display: flex; }
+  #runner.warn { background: #2a1200; }
+  #runner.go { background: var(--accent); }
+
+  .seg-progress {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  #runner.go .seg-progress { color: rgba(255,255,255,0.85); }
+
+  .stat-block { margin: 14px 0; }
+  .incline-big {
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+    font-variant-numeric: tabular-nums;
+  }
+  .speed-line {
+    color: var(--muted);
+    font-size: 18px;
+    margin-top: 6px;
+  }
+  #runner.go .speed-line { color: rgba(255,255,255,0.85); }
+
+  .time-big {
+    font-size: 56px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin: 10px 0 4px;
+  }
+
+  .countdown-num {
+    font-size: 140px;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+  }
+  .next-line {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 6px;
+  }
+
+  .next-preview {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  .progress-track {
+    width: 100%;
+    max-width: 320px;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    margin: 18px 0 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent-soft);
+    width: 0%;
+    transition: width 1s linear;
+  }
+  #runner.go .progress-fill { background: #fff; }
+
+  .total-remaining {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  #runner.go .total-remaining { color: rgba(255,255,255,0.8); }
+
+  .runner-controls {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .ctl-btn {
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .ctl-btn.end { border-color: rgba(255,77,77,0.5); color: #ff8080; }
+
+  .finish-emoji { font-size: 56px; margin-bottom: 6px; }
+  .finish-title { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+  .finish-sub { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+
+  .wake-warning {
+    display: none;
+    position: fixed;
+    top: calc(var(--safe-top) + 8px);
+    left: 16px;
+    right: 16px;
+    background: rgba(255,77,77,0.15);
+    border: 1px solid rgba(255,77,77,0.4);
+    color: #ffb0b0;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 10;
+  }
+  .wake-warning.show { display: block; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <h1>Treadmill Intervals</h1>
+  <div class="subtitle">Edit any segment, then tap Start. Keep this tab open and your volume up — you'll get a 5-second countdown before every change.</div>
+
+  <div class="card">
+    <div id="segList"></div>
+    <div class="add-row">
+      <button class="ghost-btn" id="addSegBtn">+ Add segment</button>
+    </div>
+  </div>
+
+  <div class="total-line">
+    <span>Total duration</span>
+    <span id="totalLine">—</span>
+  </div>
+
+  <button class="primary-btn" id="startBtn" style="margin-top: 14px;">Start Workout</button>
+
+  <div class="note">
+    Tip: tap the Share icon in Safari → "Add to Home Screen" so this opens full-screen like an app, without the browser bar.
+  </div>
+</div>
+
+<div id="runner">
+  <div class="wake-warning" id="wakeWarning">Screen may lock — keep tapping or enable Guided Access to prevent it.</div>
+  <div id="runnerInner"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Default workout (edit freely in the UI) ----------
+  var defaultSegments = [
+    { min: 3, incline: 12, speed: 3 },
+    { min: 5, incline: 13, speed: 3 },
+    { min: 2, incline: 11, speed: 3 },
+    { min: 3, incline: 14, speed: 3 },
+    { min: 8, incline: 11, speed: 3 },
+    { min: 6, incline: 14, speed: 3 },
+    { min: 1, incline: 15, speed: 3 },
+    { min: 2, incline: 6,  speed: 3 }
+  ];
+
+  var segments = defaultSegments.map(function (s) { return Object.assign({}, s); });
+
+  var segListEl = document.getElementById('segList');
+  var totalLineEl = document.getElementById('totalLine');
+  var addSegBtn = document.getElementById('addSegBtn');
+  var startBtn = document.getElementById('startBtn');
+  var runnerEl = document.getElementById('runner');
+  var runnerInnerEl = document.getElementById('runnerInner');
+  var wakeWarningEl = document.getElementById('wakeWarning');
+
+  function fmtTime(totalSeconds) {
+    totalSeconds = Math.max(0, Math.round(totalSeconds));
+    var m = Math.floor(totalSeconds / 60);
+    var s = totalSeconds % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function totalSeconds() {
+    return segments.reduce(function (acc, s) { return acc + s.min * 60; }, 0);
+  }
+
+  function renderEditor() {
+    segListEl.innerHTML = '';
+    segments.forEach(function (seg, i) {
+      var row = document.createElement('div');
+      row.className = 'seg-row';
+      row.innerHTML =
+        '<div class="seg-idx">' + (i + 1) + '</div>' +
+        '<div class="field"><label>Min</label><input type="number" inputmode="decimal" min="0" step="0.5" value="' + seg.min + '" data-k="min" data-i="' + i + '"></div>' +
+        '<div class="field"><label>Incline</label><input type="number" inputmode="numeric" min="0" step="1" value="' + seg.incline + '" data-k="incline" data-i="' + i + '"></div>' +
+        '<div class="field"><label>Speed</label><input type="number" inputmode="decimal" min="0" step="0.1" value="' + seg.speed + '" data-k="speed" data-i="' + i + '"></div>' +
+        '<button class="del-btn" data-del="' + i + '">✕</button>';
+      segListEl.appendChild(row);
+    });
+
+    segListEl.querySelectorAll('input').forEach(function (inp) {
+      inp.addEventListener('change', function () {
+        var i = parseInt(inp.getAttribute('data-i'), 10);
+        var k = inp.getAttribute('data-k');
+        var v = parseFloat(inp.value);
+        if (isNaN(v) || v < 0) v = 0;
+        segments[i][k] = v;
+        renderTotal();
+      });
+    });
+    segListEl.querySelectorAll('[data-del]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var i = parseInt(btn.getAttribute('data-del'), 10);
+        segments.splice(i, 1);
+        renderEditor();
+        renderTotal();
+      });
+    });
+
+    renderTotal();
+  }
+
+  function renderTotal() {
+    totalLineEl.textContent = fmtTime(totalSeconds()) + ' (' + segments.length + ' segments)';
+  }
+
+  addSegBtn.addEventListener('click', function () {
+    var last = segments[segments.length - 1] || { min: 1, incline: 10, speed: 3 };
+    segments.push({ min: 1, incline: last.incline, speed: last.speed });
+    renderEditor();
+  });
+
+  renderEditor();
+
+  // ---------- Audio (Web Audio API — no external files, works offline) ----------
+  var audioCtx = null;
+  function unlockAudio() {
+    if (!audioCtx) {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new Ctx();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    // silent blip to fully unlock on iOS
+    var b = audioCtx.createBuffer(1, 1, 22050);
+    var src = audioCtx.createBufferSource();
+    src.buffer = b;
+    src.connect(audioCtx.destination);
+    src.start(0);
+  }
+
+  function beep(freq, durationMs, type, volume) {
+    if (!audioCtx) return;
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = volume == null ? 0.35 : volume;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    var now = audioCtx.currentTime;
+    gain.gain.setValueAtTime(gain.gain.value, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + durationMs / 1000);
+    osc.start(now);
+    osc.stop(now + durationMs / 1000 + 0.02);
+  }
+
+  function tickBeep() { beep(880, 120, 'sine', 0.3); }
+  function changeBeep() {
+    beep(660, 140, 'square', 0.4);
+    setTimeout(function () { beep(990, 220, 'square', 0.4); }, 150);
+  }
+  function finishFanfare() {
+    [523, 659, 784, 1047].forEach(function (f, i) {
+      setTimeout(function () { beep(f, 220, 'triangle', 0.4); }, i * 160);
+    });
+  }
+
+  function vibrate(pattern) {
+    if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+  }
+
+  // ---------- Wake Lock ----------
+  var wakeLock = null;
+  function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+      navigator.wakeLock.request('screen').then(function (lock) {
+        wakeLock = lock;
+        wakeWarningEl.classList.remove('show');
+        lock.addEventListener('release', function () {
+          wakeLock = null;
+        });
+      }).catch(function () {
+        wakeWarningEl.classList.add('show');
+      });
+    } else {
+      wakeWarningEl.classList.add('show');
+    }
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (wakeLock !== null && document.visibilityState === 'visible' && running) {
+      requestWakeLock();
+    }
+  });
+
+  // ---------- Runner state ----------
+  var running = false;
+  var paused = false;
+  var currentIndex = 0;
+  var segRemaining = 0;
+  var totalRemaining = 0;
+  var timerHandle = null;
+  var lastTickAt = 0;
+  var countingDown = false;
+  var lastCountdownVal = null;
+  var finished = false;
+
+  function segTotalSecs(seg) { return seg.min * 60; }
+
+  function startWorkout() {
+    if (segments.length === 0) return;
+    unlockAudio();
+    requestWakeLock();
+
+    currentIndex = 0;
+    segRemaining = segTotalSecs(segments[0]);
+    totalRemaining = totalSeconds();
+    running = true;
+    paused = false;
+    finished = false;
+    countingDown = false;
+    lastCountdownVal = null;
+
+    runnerEl.classList.add('active');
+    renderRunner();
+
+    lastTickAt = Date.now();
+    timerHandle = setInterval(tick, 1000);
+  }
+
+  function tick() {
+    if (paused) { lastTickAt = Date.now(); return; }
+
+    // drift-corrected: compute how many whole seconds actually elapsed
+    var now = Date.now();
+    var elapsedMs = now - lastTickAt;
+    var wholeSecs = Math.max(1, Math.round(elapsedMs / 1000));
+    lastTickAt = now;
+
+    for (var i = 0; i < wholeSecs; i++) {
+      stepOneSecond();
+      if (finished) break;
+    }
+    renderRunner();
+  }
+
+  function stepOneSecond() {
+    if (totalRemaining <= 0) { doFinish(); return; }
+
+    totalRemaining -= 1;
+    segRemaining -= 1;
+
+    var hasNext = currentIndex < segments.length - 1;
+
+    if (hasNext && segRemaining <= 5 && segRemaining > 0) {
+      if (lastCountdownVal !== segRemaining) {
+        lastCountdownVal = segRemaining;
+        tickBeep();
+        vibrate(40);
+      }
+      countingDown = true;
+    } else {
+      countingDown = false;
+      lastCountdownVal = null;
+    }
+
+    if (segRemaining <= 0) {
+      if (hasNext) {
+        currentIndex += 1;
+        segRemaining = segTotalSecs(segments[currentIndex]);
+        countingDown = false;
+        lastCountdownVal = null;
+        changeBeep();
+        vibrate([80, 40, 80]);
+      } else {
+        doFinish();
+      }
+    }
+  }
+
+  function doFinish() {
+    finished = true;
+    running = false;
+    countingDown = false;
+    clearInterval(timerHandle);
+    if (wakeLock) { wakeLock.release().catch(function(){}); wakeLock = null; }
+    finishFanfare();
+    vibrate([100, 60, 100, 60, 200]);
+    renderRunner();
+  }
+
+  function pauseWorkout() {
+    paused = true;
+    runnerEl.classList.remove('go');
+    renderRunner();
+  }
+  function resumeWorkout() {
+    paused = false;
+    lastTickAt = Date.now();
+    renderRunner();
+  }
+  function endWorkout() {
+    running = false;
+    paused = false;
+    finished = false;
+    clearInterval(timerHandle);
+    if (wakeLock) { wakeLock.release().catch(function(){}); wakeLock = null; }
+    runnerEl.classList.remove('active', 'go', 'warn');
+    wakeWarningEl.classList.remove('show');
+  }
+
+  function currentSeg() { return segments[currentIndex]; }
+  function nextSeg() { return segments[currentIndex + 1]; }
+
+  function fmtSpeed(v) {
+    return (v % 1 === 0) ? String(v) : String(v);
+  }
+
+  function renderRunner() {
+    runnerEl.classList.toggle('go', countingDown);
+    runnerEl.classList.toggle('warn', false);
+
+    if (finished) {
+      runnerInnerEl.innerHTML =
+        '<div class="finish-emoji">🎉</div>' +
+        '<div class="finish-title">Workout complete</div>' +
+        '<div class="finish-sub">Total time: ' + fmtTime(totalSeconds()) + '</div>' +
+        '<button class="primary-btn" id="doneBtn" style="max-width:260px;">Done</button>';
+      document.getElementById('doneBtn').addEventListener('click', endWorkout);
+      return;
+    }
+
+    var seg = currentSeg();
+    var nxt = nextSeg();
+    var progressPct = 100 - (segRemaining / segTotalSecs(seg)) * 100;
+
+    var html = '';
+    html += '<div class="seg-progress">Segment ' + (currentIndex + 1) + ' of ' + segments.length + '</div>';
+
+    if (countingDown) {
+      html += '<div class="countdown-num">' + segRemaining + '</div>';
+      html += '<div class="next-line">Next: incline ' + nxt.incline + ' · speed ' + fmtSpeed(nxt.speed) + '</div>';
+    } else {
+      html += '<div class="stat-block">';
+      html += '<div class="incline-big">Incline ' + seg.incline + '</div>';
+      html += '<div class="speed-line">Speed ' + fmtSpeed(seg.speed) + '</div>';
+      html += '</div>';
+      html += '<div class="time-big">' + fmtTime(segRemaining) + '</div>';
+      html += nxt
+        ? '<div class="next-preview">Next: incline ' + nxt.incline + ' · speed ' + fmtSpeed(nxt.speed) + '</div>'
+        : '<div class="next-preview">Final segment</div>';
+    }
+
+    html += '<div class="progress-track"><div class="progress-fill" style="width:' + progressPct + '%;"></div></div>';
+    html += '<div class="total-remaining">Total remaining: ' + fmtTime(totalRemaining) + '</div>';
+    html += '<div class="runner-controls">';
+    html += '<button class="ctl-btn" id="pauseBtn">' + (paused ? 'Resume' : 'Pause') + '</button>';
+    html += '<button class="ctl-btn end" id="endBtn">End</button>';
+    html += '</div>';
+
+    runnerInnerEl.innerHTML = html;
+
+    document.getElementById('pauseBtn').addEventListener('click', function () {
+      paused ? resumeWorkout() : pauseWorkout();
+    });
+    document.getElementById('endBtn').addEventListener('click', function () {
+      if (confirm('End workout now?')) endWorkout();
+    });
+  }
+
+  startBtn.addEventListener('click', startWorkout);
+
+  // Prevent accidental pull-to-refresh / bounce during a run
+  document.addEventListener('touchmove', function (e) {
+    if (runnerEl.classList.contains('active')) e.preventDefault();
+  }, { passive: false });
+
+})();
+</script>
+</body>
+</html>
