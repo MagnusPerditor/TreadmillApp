@@ -142,6 +142,19 @@
     line-height: 1.5;
     margin-top: 10px;
   }
+  .voice-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    font-size: 14px;
+    padding: 2px 2px 14px;
+  }
+  .voice-toggle input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+  }
 
   /* ---------- Runner screen ---------- */
   #runner {
@@ -282,6 +295,11 @@
   <h1>Treadmill Intervals</h1>
   <div class="subtitle">Edit any segment, then tap Start. Keep this tab open and your volume up — you'll get a 5-second countdown before every change.</div>
 
+  <label class="voice-toggle">
+    <input type="checkbox" id="voiceToggle" checked>
+    <span>🔊 Announce changes out loud</span>
+  </label>
+
   <div class="card">
     <div id="segList"></div>
     <div class="add-row">
@@ -331,6 +349,15 @@
   var runnerEl = document.getElementById('runner');
   var runnerInnerEl = document.getElementById('runnerInner');
   var wakeWarningEl = document.getElementById('wakeWarning');
+  var voiceToggleEl = document.getElementById('voiceToggle');
+
+  var voiceEnabled = true;
+  voiceToggleEl.addEventListener('change', function () {
+    voiceEnabled = voiceToggleEl.checked;
+    if (!voiceEnabled && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+  });
 
   function fmtTime(totalSeconds) {
     totalSeconds = Math.max(0, Math.round(totalSeconds));
@@ -446,6 +473,43 @@
     if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
   }
 
+  // ---------- Voice announcements (Web Speech API — no external files) ----------
+  var speechSupported = 'speechSynthesis' in window;
+
+  function unlockSpeech() {
+    if (!speechSupported) return;
+    try {
+      // A near-silent utterance, spoken during the same tap that starts the
+      // workout, primes the speech engine so later automatic calls aren't
+      // blocked by iOS's user-gesture requirement.
+      var u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  function speak(text) {
+    if (!voiceEnabled || !speechSupported) return;
+    try {
+      window.speechSynthesis.cancel(); // don't let announcements stack/overlap
+      var utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 1.0;
+      utter.pitch = 1.0;
+      utter.volume = 1.0;
+      window.speechSynthesis.speak(utter);
+    } catch (e) {}
+  }
+
+  function speakGetReady(next) {
+    speak('Get ready. In 5 seconds, incline ' + next.incline + ', speed ' + fmtSpeed(next.speed) + '.');
+  }
+  function speakChange(seg) {
+    speak('Incline ' + seg.incline + ', speed ' + fmtSpeed(seg.speed) + '.');
+  }
+  function speakFinish() {
+    speak('Workout complete. Nice work.');
+  }
+
   // ---------- Wake Lock ----------
   var wakeLock = null;
   function requestWakeLock() {
@@ -469,6 +533,7 @@
       // the page is backgrounded. Both need to be explicitly woken back up —
       // neither resumes itself just because the tab became visible again.
       ensureAudioAwake();
+      if (speechSupported) { try { window.speechSynthesis.resume(); } catch (e) {} }
       if (running && !paused) {
         requestWakeLock();
         // Force a resync tick immediately rather than waiting up to 1s for
@@ -495,6 +560,7 @@
   function startWorkout() {
     if (segments.length === 0) return;
     unlockAudio();
+    unlockSpeech();
     requestWakeLock();
 
     currentIndex = 0;
@@ -541,6 +607,7 @@
         tickBeep();
       } else if (crossedSegment) {
         changeBeep();
+        speakChange(currentSeg());
       }
     }
 
@@ -559,7 +626,10 @@
     if (hasNext && segRemaining <= 5 && segRemaining > 0) {
       if (lastCountdownVal !== segRemaining) {
         lastCountdownVal = segRemaining;
-        if (!muted) tickBeep();
+        if (!muted) {
+          tickBeep();
+          if (segRemaining === 5) speakGetReady(segments[currentIndex + 1]);
+        }
         vibrate(40);
       }
       countingDown = true;
@@ -574,7 +644,10 @@
         segRemaining = segTotalSecs(segments[currentIndex]);
         countingDown = false;
         lastCountdownVal = null;
-        if (!muted) changeBeep();
+        if (!muted) {
+          changeBeep();
+          speakChange(segments[currentIndex]);
+        }
         vibrate([80, 40, 80]);
         crossed = 'segment';
       } else {
@@ -592,6 +665,7 @@
     clearInterval(timerHandle);
     if (wakeLock) { wakeLock.release().catch(function(){}); wakeLock = null; }
     finishFanfare();
+    speakFinish();
     vibrate([100, 60, 100, 60, 200]);
     renderRunner();
   }
@@ -611,6 +685,7 @@
       countingDown = false;
       lastCountdownVal = null;
       changeBeep();
+      speakChange(segments[currentIndex]);
       vibrate([80, 40, 80]);
       renderRunner();
     } else {
@@ -621,6 +696,7 @@
   function pauseWorkout() {
     paused = true;
     runnerEl.classList.remove('go');
+    if (speechSupported) { try { window.speechSynthesis.cancel(); } catch (e) {} }
     renderRunner();
   }
   function resumeWorkout() {
@@ -635,6 +711,7 @@
     finished = false;
     clearInterval(timerHandle);
     if (wakeLock) { wakeLock.release().catch(function(){}); wakeLock = null; }
+    if (speechSupported) { try { window.speechSynthesis.cancel(); } catch (e) {} }
     runnerEl.classList.remove('active', 'go', 'warn');
     wakeWarningEl.classList.remove('show');
   }
