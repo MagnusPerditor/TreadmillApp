@@ -238,7 +238,9 @@
 
   .runner-controls {
     display: flex;
-    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     margin-top: 10px;
   }
   .ctl-btn {
@@ -246,8 +248,8 @@
     background: rgba(255,255,255,0.08);
     color: #fff;
     border-radius: 12px;
-    padding: 12px 20px;
-    font-size: 15px;
+    padding: 11px 16px;
+    font-size: 14px;
     font-weight: 600;
   }
   .ctl-btn.end { border-color: rgba(255,77,77,0.5); color: #ff8080; }
@@ -405,8 +407,16 @@
     src.start(0);
   }
 
+  function ensureAudioAwake() {
+    if (!audioCtx) return;
+    if (audioCtx.state !== 'running') {
+      audioCtx.resume();
+    }
+  }
+
   function beep(freq, durationMs, type, volume) {
     if (!audioCtx) return;
+    ensureAudioAwake();
     var osc = audioCtx.createOscillator();
     var gain = audioCtx.createGain();
     osc.type = type || 'sine';
@@ -454,8 +464,17 @@
     }
   }
   document.addEventListener('visibilitychange', function () {
-    if (wakeLock !== null && document.visibilityState === 'visible' && running) {
-      requestWakeLock();
+    if (document.visibilityState === 'visible') {
+      // iOS suspends the audio context (and releases the wake lock) the moment
+      // the page is backgrounded. Both need to be explicitly woken back up —
+      // neither resumes itself just because the tab became visible again.
+      ensureAudioAwake();
+      if (running && !paused) {
+        requestWakeLock();
+        // Force a resync tick immediately rather than waiting up to 1s for
+        // the next interval, so state (and any due alert) catches up right away.
+        tick();
+      }
     }
   });
 
@@ -503,25 +522,44 @@
     var wholeSecs = Math.max(1, Math.round(elapsedMs / 1000));
     lastTickAt = now;
 
+    // If we were away more than a couple seconds (backgrounded/locked), don't
+    // fire a beep for every missed second — that just sounds like a garbled
+    // burst once the audio context wakes back up. Fast-forward silently and
+    // play a single cue reflecting where we actually landed.
+    var catchingUp = wholeSecs > 2;
+    var crossedSegment = false;
+
     for (var i = 0; i < wholeSecs; i++) {
-      stepOneSecond();
+      var result = stepOneSecond(catchingUp);
+      if (result === 'segment') crossedSegment = true;
       if (finished) break;
     }
+
+    if (catchingUp && !finished) {
+      ensureAudioAwake();
+      if (countingDown) {
+        tickBeep();
+      } else if (crossedSegment) {
+        changeBeep();
+      }
+    }
+
     renderRunner();
   }
 
-  function stepOneSecond() {
+  function stepOneSecond(muted) {
     if (totalRemaining <= 0) { doFinish(); return; }
 
     totalRemaining -= 1;
     segRemaining -= 1;
 
     var hasNext = currentIndex < segments.length - 1;
+    var crossed = null;
 
     if (hasNext && segRemaining <= 5 && segRemaining > 0) {
       if (lastCountdownVal !== segRemaining) {
         lastCountdownVal = segRemaining;
-        tickBeep();
+        if (!muted) tickBeep();
         vibrate(40);
       }
       countingDown = true;
@@ -536,12 +574,15 @@
         segRemaining = segTotalSecs(segments[currentIndex]);
         countingDown = false;
         lastCountdownVal = null;
-        changeBeep();
+        if (!muted) changeBeep();
         vibrate([80, 40, 80]);
+        crossed = 'segment';
       } else {
         doFinish();
       }
     }
+
+    return crossed;
   }
 
   function doFinish() {
@@ -555,6 +596,28 @@
     renderRunner();
   }
 
+  function skipSegment() {
+    if (finished) return;
+
+    var hasNext = currentIndex < segments.length - 1;
+    totalRemaining -= segRemaining;
+    if (totalRemaining < 0) totalRemaining = 0;
+
+    ensureAudioAwake();
+
+    if (hasNext) {
+      currentIndex += 1;
+      segRemaining = segTotalSecs(segments[currentIndex]);
+      countingDown = false;
+      lastCountdownVal = null;
+      changeBeep();
+      vibrate([80, 40, 80]);
+      renderRunner();
+    } else {
+      doFinish();
+    }
+  }
+
   function pauseWorkout() {
     paused = true;
     runnerEl.classList.remove('go');
@@ -562,6 +625,7 @@
   }
   function resumeWorkout() {
     paused = false;
+    ensureAudioAwake();
     lastTickAt = Date.now();
     renderRunner();
   }
@@ -621,6 +685,7 @@
     html += '<div class="total-remaining">Total remaining: ' + fmtTime(totalRemaining) + '</div>';
     html += '<div class="runner-controls">';
     html += '<button class="ctl-btn" id="pauseBtn">' + (paused ? 'Resume' : 'Pause') + '</button>';
+    html += '<button class="ctl-btn" id="skipBtn">' + (nxt ? 'Skip →' : 'Finish') + '</button>';
     html += '<button class="ctl-btn end" id="endBtn">End</button>';
     html += '</div>';
 
@@ -628,6 +693,9 @@
 
     document.getElementById('pauseBtn').addEventListener('click', function () {
       paused ? resumeWorkout() : pauseWorkout();
+    });
+    document.getElementById('skipBtn').addEventListener('click', function () {
+      skipSegment();
     });
     document.getElementById('endBtn').addEventListener('click', function () {
       if (confirm('End workout now?')) endWorkout();
